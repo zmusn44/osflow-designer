@@ -1,37 +1,43 @@
 # osflow-designer
 
 #### 介绍
-流程图引擎，流程定义工具。
+流程图引擎，是流程定义工具，含后台表数据结构版本。
 
-#### 软件架构
-软件架构说明
+是流程设计器([FlowDesigner](https://gitee.com/openEA/FlowDesigner))的升级版本，与[osflow-engine](https://gitee.com/openEA/osflow-engine)组成完整的流程引擎。
 
 
-#### 安装教程
+#### 源码部署
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1、导入flowchart.sql文件到MySQL数据库中，导入方法：
+
+```shell
+#创建数据库flowchart
+ CREATE DATABASE flowchart DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+#还原数据库
+ mysql -u root -p flowchart < E:\flowchart.sql
+```
+
+2、项目依赖于联科的“lkengine-db-1.0.jar”存储引擎，可将maven仓库(联科)文件夹中的"cn"文件夹复制到Maven仓库根目录，或自行关联依赖，后续会上传到中央仓库。
+
+3、用IDEA导入osflow-designer项目，使用Maven构建依赖，并在config.properties文件中配置数据库信息。
+
+![](./doc/images/配置数据库.png)
+
+4、运行成功效果
+
+1. 流程首页
+
+   ![](./doc/images/流程首页.png)
+
+2. 流程定义页面
+
+​       ![](./doc/images/流程定义.png)
 
 #### 使用说明
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+流程定义参考：https://gitee.com/openEA/FlowDesigner
 
 
-#### 特技
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+QQ交流群：823545910
+

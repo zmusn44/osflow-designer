@@ -1,0 +1,21 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="osflow-designer:war exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/osflow_designer_war_exploded</output-path>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="osflow-designer" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="Maven: com.alibaba:fastjson:1.1.35" />
+          <element id="library" level="project" name="Maven: org.apache.httpcomponents:httpclient:4.3.3" />
+          <element id="library" level="project" name="Maven: org.apache.httpcomponents:httpcore:4.3.3" />
+          <element id="library" level="project" name="Maven: mysql:mysql-connector-java:5.1.32" />
+          <element id="library" level="project" name="Maven: org.apache.commons:commons-lang3:3.3.2" />
+          <element id="library" level="project" name="Maven: cn.linkey.orm:lkengine-db:1.0" />
+        </element>
+      </element>
+      <element id="javaee-facet-resources" facet="osflow-designer/web/Web" />
+    </root>
+  </artifact>
+</component>
