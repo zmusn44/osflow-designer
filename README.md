@@ -17,7 +17,7 @@
  mysql -u root -p flowchart < E:\flowchart.sql
 ```
 
-2、项目依赖于联科的“lkengine-db-1.0.jar”存储引擎，可将maven仓库(联科)文件夹中的"cn"文件夹复制到Maven仓库根目录，或自行关联依赖，后续会上传到中央仓库。
+2、项目依赖于联科的“lkengine-db-1.0.jar”存储引擎，可将repository文件夹中的"cn"文件夹复制到Maven仓库根目录，或自行关联依赖，后续会上传到中央仓库。
 
 3、用IDEA导入osflow-designer项目，使用Maven构建依赖，并在config.properties文件中配置数据库信息。
 
