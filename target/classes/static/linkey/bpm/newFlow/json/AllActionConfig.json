@@ -1,0 +1,98 @@
+[
+  {
+    "ActionName": "提交下一会签用户",
+    "Actionid": "GoToNextParallelUser"
+  },
+  {
+    "ActionName": "收回文档",
+    "Actionid": "Undo"
+  },
+  {
+    "ActionName": "结束当前环节并推进到下一环节",
+    "Actionid": "GoToNextNode"
+  },
+  {
+    "ActionName": "回退首环节",
+    "Actionid": "GoToFirstNode"
+  },
+  {
+    "ActionName": "尝试结束子流程节点",
+    "Actionid": "EndSubProcessNode"
+  },
+  {
+    "ActionName": "回退上一环节",
+    "Actionid": "GoToPrevNode"
+  },
+  {
+    "ActionName": "暂停",
+    "Actionid": "Pause"
+  },
+  {
+    "ActionName": "标记为阅",
+    "Actionid": "EndCopyTo"
+  },
+  {
+    "ActionName": "后台启动用户任务",
+    "Actionid": "StartUser"
+  },
+  {
+    "ActionName": "办理完成",
+    "Actionid": "EndUserTask"
+  },
+  {
+    "ActionName": "转他人处理",
+    "Actionid": "GoToOthers"
+  },
+  {
+    "ActionName": "归档",
+    "Actionid": "GoToArchived"
+  },
+  {
+    "ActionName": "后台结束用户任务",
+    "Actionid": "EndUser"
+  },
+  {
+    "ActionName": "提交任意环节",
+    "Actionid": "GoToAnyNode"
+  },
+  {
+    "ActionName": "回退上一用户",
+    "Actionid": "GoToPrevUser"
+  },
+  {
+    "ActionName": "后台结束节点",
+    "Actionid": "EndNode"
+  },
+  {
+    "ActionName": "回退任意环节",
+    "Actionid": "ReturnToAnyNode"
+  },
+  {
+    "ActionName": "返回给转交者",
+    "Actionid": "BackToDeliver"
+  },
+  {
+    "ActionName": "恢复",
+    "Actionid": "UnPause"
+  },
+  {
+    "ActionName": "提交下一串行用户",
+    "Actionid": "GoToNextSerialUser"
+  },
+  {
+    "ActionName": "自动运行",
+    "Actionid": "AutoRun"
+  },
+  {
+    "ActionName": "返回给回退者",
+    "Actionid": "BackToReturnUser"
+  },
+  {
+    "ActionName": "传阅用户",
+    "Actionid": "CopyTo"
+  },
+  {
+    "ActionName": "同步任务",
+    "Actionid": "SyncUserTask"
+  }
+]

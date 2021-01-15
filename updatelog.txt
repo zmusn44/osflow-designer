@@ -1,0 +1,8 @@
+20210115更新
+发布流程图引擎V1.1，对应版本号：osflow-designer_1_1_20210115
+重构osflow-designer,规范流程定义接口(SpringBoot版本)
+
+
+20201220更新
+
+发布流程图引擎V1.0，对应版本号：osflow-designer_1_0_20201220

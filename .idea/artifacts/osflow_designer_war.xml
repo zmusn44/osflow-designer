@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="war" name="osflow-designer:war">
-    <output-path>$PROJECT_DIR$/out/artifacts/osflow_designer_war</output-path>
-    <root id="archive" name="osflow-designer_war.war">
-      <element id="artifact" artifact-name="osflow-designer:war exploded" />
-    </root>
-  </artifact>
-</component>
