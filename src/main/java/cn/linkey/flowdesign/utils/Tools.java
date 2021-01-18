@@ -62,13 +62,14 @@ public class Tools {
 		return bl;
 
 	}
-	
+
 	/**
-     * 根据节点id获得节点所在数据库表名
-     * 
-     * @param nodeid
-     * @return 数据库表名
-     */
+	 * 根据节点id获得节点所在数据库表名
+	 *
+	 * @param processid 流程ID
+	 * @param nodeid 节点ID
+	 * @return 数据库表名，例如人工活动存储表，网关存储表，事件存储表等
+	 */
     public static String getNodeTableName(String processid, String nodeid) {
         String nodeType = getNodeType(processid, nodeid);
         if (isBlank(nodeType)) {
@@ -76,13 +77,14 @@ public class Tools {
         }
         return "BPM_Mod" + nodeType + "List";
     }
-    
-    /**
-     * 根据节点id获得节点的基本类型名称
-     * 
-     * @param nodeid
-     * @return 数据库表名
-     */
+
+	/**
+	 * 根据节点id获得节点所在数据库表名
+	 *
+	 * @param processid 流程ID
+	 * @param nodeid 节点ID
+	 * @return 数据库表名，例如人工活动存储表，网关存储表，事件存储表等
+	 */
     public static String getNodeType(String processid, String nodeid) {
         // 根据节点首字母得到，速度最快
         if (isBlank(nodeid)) {

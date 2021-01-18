@@ -328,6 +328,7 @@ public class DesignServer {
      * 前端获得数据后，依据Processid和flowJSON的内容，重新将保存过的流程图模型进行渲染显示
      *
      * @param processid 流程id，非必须，为空时表示新建流程
+     * @param nodeid 节点id
      * @return {"status","0/1","msg":"提示信息","Processid":"36位UUID","flowJSON":"流程图模型数据"}
      */
     @RequestMapping(value = "/design/getFlowChartModByNodeType/{processid}/{nodeid}", method = RequestMethod.GET)

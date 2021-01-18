@@ -5,10 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 
 /**
  * @author Mr.Yun / alibao
- * @Name: 流程图统一接口，所有与流程图相关的内容前后端处理，都将经过本接口
- * @Desc: 一切只为成就更好的您
- * @version: 1.0
- * @Created: 2020/07/31 13:06
+ * 流程图统一接口，所有与流程图相关的内容前后端处理，都将经过本接口
+ * 1.2
+ * 2020/07/31 13:06
  */
 public interface FlowChart {
 

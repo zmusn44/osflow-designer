@@ -330,10 +330,15 @@ public class FlowchartImp implements FlowChart {
 		json = (JSONObject) JSONObject.parse(doc.toJson());
 		return json;
 	}
-	
-    /**
-     * 存盘流程过程属性
-     */
+
+	/**
+	 * 存盘流程过程属性
+	 * @param processid    流程ID
+	 * @param nodeid        节点ID
+	 * @param extNodeType   扩展节点类型
+	 * @param formParmes    流程属性
+	 * @return  "ok", "保存成功"  || "error", "保存失败"
+	 */
     public JSONObject saveProcess(String processid, String nodeid, String extNodeType, JSONObject formParmes) {
         String nodeTableName = Tools.getNodeTableName(processid, nodeid); //节点所在数据库表
     	String sql = "select * from " + nodeTableName + " where Processid='" + processid + "' and Nodeid='" + nodeid + "'";
@@ -384,10 +389,15 @@ public class FlowchartImp implements FlowChart {
         }
     	return null;
     }
-    
-    /**
-     * 存盘通用节点
-     */
+
+	/**
+	 * 存盘通用节点
+	 * @param processid  流程ID
+	 * @param nodeid      节点ID
+	 * @param extNodeType  扩展节点类型
+	 * @param formParmes   节点属性
+	 * @return "ok", "保存成功" || "error", "保存失败"
+	 */
     public JSONObject saveNode(String processid, String nodeid, String extNodeType, JSONObject formParmes) {
          String nodeTableName = Tools.getNodeTableName(processid, nodeid); //节点所在数据库表
          String sql = "select * from " + nodeTableName + " where Processid='" + processid + "' and Nodeid='" + nodeid + "'";
@@ -641,11 +651,12 @@ public class FlowchartImp implements FlowChart {
 		return json;
 	}
 
-    /**
-     * 删除指定节点
-     * 
-     * @param processid
-     */
+	/**
+	 * 删除指定节点
+	 * @param processid 流程ID
+	 * @param nodeid    节点ID
+	 * @return   "ok", "节点成功删除!"
+	 */
     public JSONObject deleteNode(String processid, String nodeid) {
     	JSONObject result = new JSONObject();
 //        String nodeid = BeanCtx.g("Nodeid", true);
@@ -659,9 +670,12 @@ public class FlowchartImp implements FlowChart {
         return result;
     }
 
-    /**
-     * 检测所有节点是否有保存属性
-     */
+	/**
+	 * 检测所有节点是否有保存属性
+	 * @param processid 流程ID
+	 * @param nodeList  节点ID，多个以逗号隔开
+	 * @return 返回保存接口，json
+	 */
     public JSONObject checkAllNodeAttr(String processid, String nodeList) {
     	JSONObject result = new JSONObject();
     	Rdb rdb = BeanCtx.getRdb();
@@ -681,9 +695,15 @@ public class FlowchartImp implements FlowChart {
         return result;
     }
 
-    /**
-     * 保存节点的所有缺省属性
-     */
+	/**
+	 * 保存节点的所有缺省属性
+	 * @param processid  流程ID
+	 * @param nodeid     节点ID
+	 * @param nodeType   节点类型
+	 * @param startNodeid  开始节点ID
+	 * @param endNodeid    结束节点ID
+	 * @return  {"ok", "ok"}
+	 */
     public JSONObject saveAllDefaultNodeAttr(String processid, String nodeid, String nodeType, String startNodeid, String endNodeid ) {
     	JSONObject result = new JSONObject();
     	Rdb rdb = BeanCtx.getRdb();
