@@ -6,6 +6,14 @@
 是流程设计器([FlowDesigner](https://gitee.com/openEA/FlowDesigner))的升级版本，与[osflow-engine](https://gitee.com/openEA/osflow-engine)组成完整的流程引擎。
 
 
+
+#### 项目结构
+
+Spring Boot + lkengine-db + Druid
+
+
+
+
 #### 源码部署
 
 1、导入flowchart.sql文件到MySQL数据库中，导入方法：
@@ -34,6 +42,8 @@
 
 4、运行成功效果
 
+部署后访问地址：http://localhost:8080/design/index.html
+
 1. 流程首页
 
    ![](./doc/images/流程首页.png)
@@ -42,7 +52,11 @@
 
 ​       ![](./doc/images/流程定义.png)
 
+
+
 #### 使用说明
+
+官网文档：http://open.linkey.cn/osbpm/r?wf_num=P_openLinkey_N002&treeid=T_openLinkey_N002&docVn=osflow-designer_1_0
 
 流程定义参考：https://gitee.com/openEA/FlowDesigner
 
