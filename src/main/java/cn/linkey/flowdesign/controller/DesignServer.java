@@ -7,11 +7,13 @@ import cn.linkey.orm.dao.Rdb;
 import cn.linkey.orm.dao.impl.RdbImpl;
 import cn.linkey.orm.factory.BeanCtx;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.util.JdbcUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -23,7 +25,7 @@ public class DesignServer {
 
     // 注入数据源对象
     @Resource
-    private DruidDataSource dataSource;
+    private DataSource dataSource;
 
 
     /**
@@ -53,7 +55,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -86,7 +88,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -95,7 +97,7 @@ public class DesignServer {
 
 
     /**
-     * 获取流程图模型数据接口
+     * 获取流程图形化配置
      * 前端获得数据后，依据Processid和flowJSON的内容，重新将保存过的流程图模型进行渲染显示
      *
      * @param processid 流程id，非必须，为空时表示新建流程
@@ -122,7 +124,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -159,7 +161,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -205,7 +207,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -241,7 +243,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -280,7 +282,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -315,7 +317,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -324,11 +326,11 @@ public class DesignServer {
 
 
     /**
-     * 获取流程图模型数据接口
+     * 获取节点配置信息
      * 前端获得数据后，依据Processid和flowJSON的内容，重新将保存过的流程图模型进行渲染显示
      *
      * @param processid 流程id，非必须，为空时表示新建流程
-     * @param nodeid 节点id
+     * @param nodeid    节点id
      * @return {"status","0/1","msg":"提示信息","Processid":"36位UUID","flowJSON":"流程图模型数据"}
      */
     @RequestMapping(value = "/design/getFlowChartModByNodeType/{processid}/{nodeid}", method = RequestMethod.GET)
@@ -352,7 +354,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -360,6 +362,7 @@ public class DesignServer {
     }
 
     /**
+     * 获取节点事件配置信息
      * 获取各节点类型的事件统一请求接口，事件统一到表 BPM_EngineEventConfig 中依据筛选条件进行获取
      *
      * @param processid 流程id，必须
@@ -389,7 +392,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -424,7 +427,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -463,7 +466,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -471,7 +474,7 @@ public class DesignServer {
     }
 
     /**
-     * 表单字段配置
+     * 获取表单字段配置
      *
      * @param processid 流程id，必须
      * @return 表单字段配置JSON
@@ -497,7 +500,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -545,7 +548,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -583,7 +586,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -640,7 +643,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -708,7 +711,7 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
@@ -744,10 +747,171 @@ public class DesignServer {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            dataSource.discardConnection(conn);
+            JdbcUtils.close(conn);
         }
 
         return jsonObj;
+
+    }
+
+
+    /**
+     * 更新事件规则配置到数据库中
+     *
+     * @return {"status","0/1","msg":"提示信息"}
+     */
+    @RequestMapping(value = "/design/updateEventRuleConfig", method = RequestMethod.GET)
+    public JSONObject updateEventRuleConfig() {
+
+        FlowChart imp = new FlowchartImp();
+        JSONObject jsonObj = new JSONObject();
+        Connection conn = null;
+        Rdb rdb;
+
+        try {
+            conn = dataSource.getConnection();
+
+            // 初始化连接
+            rdb = new RdbImpl(conn);
+            BeanCtx.setConnection(conn);
+            BeanCtx.setRdb(rdb);
+
+            jsonObj = imp.updateEventRuleConfig();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            JdbcUtils.close(conn);
+        }
+
+        return jsonObj;
+
+    }
+
+
+    /**
+     * 新增、修改或删除事件配置
+     *
+     * @param delRow  删除的记录
+     * @param newRow  新增的记录
+     * @param editRow 编辑的记录
+     * @return 处理结果 json
+     */
+    @RequestMapping(value = "/design/saveEventRuleConfig", method = RequestMethod.POST)
+    public JSONObject saveEventRuleConfig(@RequestParam(name = "delRow", required = false) String delRow,
+                                          @RequestParam(name = "newRow", required = false) String newRow,
+                                          @RequestParam(name = "editRow", required = false) String editRow) {
+
+        FlowChart imp = new FlowchartImp();
+        JSONObject jsonObj = new JSONObject();
+        Connection conn = null;
+        Rdb rdb;
+
+        JSONArray delRowArry = JSONObject.parseArray(delRow);
+        JSONArray newRowArry = JSONObject.parseArray(newRow);
+        JSONArray editRowArry = JSONObject.parseArray(editRow);
+
+        try {
+            conn = dataSource.getConnection();
+
+            // 初始化连接
+            rdb = new RdbImpl(conn);
+            BeanCtx.setConnection(conn);
+            BeanCtx.setRdb(rdb);
+
+            if (newRowArry.size() > 0) {
+                jsonObj.put("save", imp.saveEventRuleConfig(newRowArry, "bpm_rulelist"));
+            }
+            if (editRowArry.size() > 0) {
+                jsonObj.put("edit", imp.saveEventRuleConfig(editRowArry, "bpm_rulelist"));
+            }
+
+            String docUnidList = "";
+            for (int i = 0; i < delRowArry.size(); i++) {
+                if (i > 0) {
+                    docUnidList += "," + delRowArry.getJSONObject(i).get("WF_OrUnid");
+                    continue;
+                }
+                docUnidList += delRowArry.getJSONObject(i).get("WF_OrUnid");
+            }
+            if (Tools.isNotBlank(docUnidList)) {
+                jsonObj.put("delete", imp.deleteEventRuleConfig(docUnidList, "bpm_rulelist"));
+            }
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            JdbcUtils.close(conn);
+        }
+
+        return jsonObj;
+
+    }
+
+
+    @RequestMapping(value = "/design/getEventRuleConfig")
+    public JSONObject getEventRuleConfig(@RequestParam(name = "page", required = false, defaultValue = "1") int pageNum,
+                                         @RequestParam(name = "rows", required = false, defaultValue = "25") int rows,
+                                         @RequestParam(name = "searchStr", required = false, defaultValue = "") String searchStr) {
+
+        FlowChart imp = new FlowchartImp();
+        JSONObject jsonObj = new JSONObject();
+        Connection conn = null;
+        Rdb rdb;
+
+        String DefaultSearchField = "RuleName,RuleNum";
+
+        try {
+            conn = dataSource.getConnection();
+
+            // 初始化连接
+            rdb = new RdbImpl(conn);
+            BeanCtx.setConnection(conn);
+            BeanCtx.setRdb(rdb);
+
+            jsonObj = imp.getCommonJson(pageNum, rows, "bpm_rulelist", searchStr, DefaultSearchField);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            JdbcUtils.close(conn);
+        }
+
+        return jsonObj;
+
+    }
+
+    /**
+     * 更新事件规则配置到数据库中
+     *
+     * @return {"status","0/1","msg":"提示信息"}
+     */
+    @RequestMapping(value = "/design/getRuleTree", method = RequestMethod.GET)
+    public JSONArray getRuleTree() {
+
+        FlowChart imp = new FlowchartImp();
+        JSONArray jsonArray = new JSONArray();
+        Connection conn = null;
+        Rdb rdb;
+
+        try {
+            conn = dataSource.getConnection();
+
+            // 初始化连接
+            rdb = new RdbImpl(conn);
+            BeanCtx.setConnection(conn);
+            BeanCtx.setRdb(rdb);
+
+            jsonArray = imp.getRuleTree();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            JdbcUtils.close(conn);
+        }
+
+        return jsonArray;
 
     }
 

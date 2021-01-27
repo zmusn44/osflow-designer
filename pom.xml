@@ -10,9 +10,9 @@
     </parent>
 
     <groupId>cn.linkey</groupId>
-    <artifactId>osflow-designer1</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>osflow-designer1</name>
+    <artifactId>osflow-designer</artifactId>
+    <version>1.1.2</version>
+    <name>osflow-designer</name>
     <description>流程定义工具</description>
 
     <properties>

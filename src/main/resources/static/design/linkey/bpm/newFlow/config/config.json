@@ -93,7 +93,13 @@
 		"saveFlowChartGraphic": "../../../../../design/saveFlowChartGraphic",
 		"getFlowChartMailConfigByUnid": "../../../../../design/getFlowChartMailConfigByUnid/{unid}",
 		"deleteFlowChartMailConfigByNodeType": "../../../../../design/deleteFlowChartMailConfigByNodeType",
-		"saveFlowChartMailConfigByNodeType": "../../../../../design/saveFlowChartMailConfigByNodeType"
+		"saveFlowChartMailConfigByNodeType": "../../../../../design/saveFlowChartMailConfigByNodeType",
+		"getEventRuleConfig": "../../../../../design/getEventRuleConfig",
+		"saveEventRuleConfig": "../../../../../design/saveEventRuleConfig",
+		"updateEventRuleConfig": "../../../../../design/updateEventRuleConfig",
+		"getRuleTree": "../../../../../design/getRuleTree"
+
+
 	},
 	"msg": {
 		"noNode": "保存失败，流程图不存在任何节点",

@@ -27,7 +27,7 @@
         function formonload() {
             var Nodeid = GetUrlArg("Nodeid");
             $("#Nodeid").html(Nodeid);
-            $('#event').attr("src", "../view/EventView.html?WF_Action=edit&WF_DocUnid=&Processid=" + GetUrlArg("Processid") + "&Nodeid=" + GetUrlArg("Nodeid") + "&NodeType=" + GetUrlArg("ExtNodeType") + "&WF_Appid=S029")
+            $('#event').attr("src", "../view/CommonEventView.html?eventType=Event&WF_Action=edit&WF_DocUnid=&Processid=" + GetUrlArg("Processid") + "&Nodeid=" + GetUrlArg("Nodeid") + "&NodeType=" + GetUrlArg("ExtNodeType") + "&WF_Appid=S029")
 
             var processAttrUrl = CONFIG.url.getFlowChartModByNodeType;
             processAttrUrl = processAttrUrl.replace("{processid}", GetUrlArg("Processid")).replace("{nodeid}", GetUrlArg("Nodeid"));

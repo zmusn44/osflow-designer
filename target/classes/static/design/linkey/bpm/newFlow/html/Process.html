@@ -27,7 +27,7 @@
 
             var Nodeid = GetUrlArg("Nodeid");
             $("#Nodeid").html(Nodeid);
-            $('#event').attr("src", "../view/ProcessEventView.html?WF_Action=edit&WF_DocUnid=&Processid=" + GetUrlArg("Processid") + "&Nodeid=" + GetUrlArg("Nodeid") + "&NodeType=" + GetUrlArg("ExtNodeType") + "&WF_Appid=S029")
+            $('#event').attr("src", "../view/CommonEventView.html?eventType=ProcessEvent&WF_Action=edit&WF_DocUnid=&Processid=" + GetUrlArg("Processid") + "&Nodeid=" + GetUrlArg("Nodeid") + "&NodeType=" + GetUrlArg("ExtNodeType") + "&WF_Appid=S029")
 
             $('#formConfig').attr("src", "./formConfig.html?WF_Action=edit&WF_DocUnid=&Processid=" + GetUrlArg("Processid") + "&Nodeid=" + GetUrlArg("Nodeid") + "&NodeType=" + GetUrlArg("ExtNodeType") + "&WF_Appid=S029")
 

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<head><title>节点事件列表配置</title>
+<head><title>节点字段配置</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,9 +11,9 @@
     <script type="text/javascript" src="../../jscode/sharefunction.js"></script>
     <script type="text/javascript" src="../../jscode/json.js"></script>
     <script type="text/javascript" src="../../jscode/viewgrid.js"></script>
-    <script type="text/javascript" src="../../easyui/locale/easyui-lang-zh_CN.js"></script>
-
     <script>
+        var FormNum = "", GridNum = "V_S002_E003";
+        WF_Appid = "S029";
 
         var CONFIG = [];
         $.ajax({
@@ -25,6 +25,16 @@
                 CONFIG = data;
             }
         });
+
+        $(function () {
+
+
+            $('#dg').datagrid({
+                method: 'GET',
+                url: CONFIG.url.getEventRuleConfig,
+            });
+
+        })
 
         function formatlink(v, r) {
             return "<a href='' onclick=\"RowDblClick(0,'" + r.WF_OrUnid + "');return false;\" >" + v + "</a>";
@@ -44,18 +54,9 @@
             });
         });
 
-        $(function () {
-
-            var processAttrUrl = CONFIG.url.getFlowChartEventByNodeType;
-            processAttrUrl = processAttrUrl.replace("{processid}", GetUrlArg("Processid")).replace("{nodeid}", GetUrlArg("Nodeid"));
-
-            $('#dg').datagrid({
-                method: 'GET',
-                url: processAttrUrl,
-            });
-            // $('#dg').datagrid('load');
-        })
-
+        /**
+         * 保存提交
+         * */
         function saveEditorGrid() {
             //获得所有修改的数据
             stopEditRow();
@@ -63,22 +64,20 @@
 
             //获得所有修改的数据
             var delRow = JSON.stringify(dg.datagrid('getChanges', 'deleted'));
-
+            console.dir(GetUrlArg("Nodeid"))
             var rowData = dg.datagrid('getChanges', 'inserted');
             for (var i = 0; i < rowData.length; i++) {
                 rowData[i].Processid = GetUrlArg("Processid");
                 rowData[i].Nodeid = GetUrlArg("Nodeid");
             }
+
             var newRow = JSON.stringify(rowData);
-
             var editRow = JSON.stringify(dg.datagrid('getChanges', 'updated'));
+
+
             //保存修改结果
-
-            var saveFlowAttrUrl = CONFIG.url.saveFlowChartEventByNodeType;
-            saveFlowAttrUrl = saveFlowAttrUrl.replace("{processid}", GetUrlArg("Processid")).replace("{nodeid}", GetUrlArg("Nodeid"));
-
             mask();
-            $.post(saveFlowAttrUrl, {
+            $.post(CONFIG.url.saveEventRuleConfig, {
                 WF_Action: 'saveEditor',
                 delRow: delRow,
                 newRow: newRow,
@@ -93,9 +92,6 @@
             });
         }
 
-        function serializeForm() {
-        }
-
         function insertRow() {
             //插入新行
             stopEditRow();
@@ -108,18 +104,22 @@
             stopEditRow();
             var rows = $('#dg').datagrid('getSelections');
             if (!rows || rows.length == 0) {
-                $.messager.alert('提示', '请选择要删除的数据!', 'info');
+                $.messager.alert('提示', '请选择要删除的字段!', 'info');
                 return;
             }
-            $.messager.confirm('Confirm', '您确定要删除选中记录吗?', function (r) {
+            $.messager.confirm('Confirm', '您确定要删除选中字段吗?', function (r) {
                 if (r) {
                     var dg = $('#dg');
                     $.each(rows, function (i, row) {
                         var index = dg.datagrid('getRowIndex', row);
                         dg.datagrid('deleteRow', index);
                     });
+
+                    saveEditorGrid();
                 }
             });
+
+
         }
 
         var lastIndex;
@@ -141,47 +141,81 @@
         }
 
 
+        /**
+         * 保存字段设置
+         * add by alibao 20201021
+         */
+        // function saveConfig() {
+        //
+        //     $('#dg').datagrid('acceptChanges');
+        //     var rowdata = $('#dg').datagrid('getData');
+        //     var j = 0;
+        //     var postdata = {};
+        //
+        //     postdata.total = rowdata.rows.length;
+        //     postdata.rows = rowdata.rows;
+        //     postdata = JSON.stringify(postdata);
+        //
+        //
+        //     $.post(CONFIG.url.saveEventRuleConfig, {formConfig: postdata},
+        //         function (ed) {
+        //             alert(ed.msg);
+        //         }, "json");
+        // }
+
+
+        /**
+         * 返回节点事件配置视图
+         */
+        function backurl() {
+            window.history.back();
+        }
+
+        /**
+         *
+         * 更新事件配置
+         */
+        function updateConfig() {
+
+            $.ajax({
+                type: "GET",
+                url: CONFIG.url.updateEventRuleConfig,
+                success: function(ed){
+                    alert(ed.msg);
+                    $('#dg').datagrid('load');
+                }
+            });
+        }
+
+
     </script>
 </head>
-<html>
-<head></head>
 <body>
 <div class="toptoolbar" id="toptoolbar">
-    |
-    <a href="#" id="btnSave" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-save'"
-       onclick="saveEditorGrid();return false;">保存事件</a>|
-    <a href="#" id="btnNew" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-add'"
-       onclick="insertRow();return false;">新增事件</a>|
-    <a href="#" id="btnDel" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-remove'"
-       onclick="removeSelectedRow();return false;">删除</a>|
-    <a href="#" id="btn01" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-ok'"
-       onclick="stopEditRow();return false;">停止编辑</a>
+    <span style="float:right;padding-right:20px;margin-top: 7px;">搜索:<input class="easyui-searchbox" data-options="searcher:GridDoSearch,prompt:'输入关键字后回车...'" id="SearchKeyWord" style="width:150px;"/></span>-
+    <a href="#" id="btnSave" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-add'" onclick="saveEditorGrid();return false;">保存设置</a> -
+<!--    <a href="#" id="btnNew" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-add'" onclick="insertRow();return false;">新增</a> - -->
+    <a href="#" id="btnDel" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-remove'" onclick="removeSelectedRow();return false;">删除字段</a> -
+    <a href="#" id="btnupdate" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-ok'" onclick="updateConfig();return false;">更新事件配置</a> -
+    <a href="#" id="btnback" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-back'" onclick="backurl();return false;">返回</a>
 </div>
+
 <table id="dg" class="easyui-datagrid"
-       data-options="toolbar:toptoolbar,fit:true,autoRowHeight:false,remoteSort:true,border:false,rownumbers: true,fitColumns:true,singleSelect:false,multiSort:true,onDblClickRow:stopEditRow,onClickRow:RowClick,onRowContextMenu:stopEditRow,pageSize:25,pageList:[20,25,30,40,60]">
+       data-options="toolbar:toptoolbar,fit:true,autoRowHeight:false,remoteSort:false,border:false,rownumbers: true,fitColumns:true,singleSelect:false,multiSort:true,onDblClickRow:stopEditRow,onClickRow:RowClick,onRowContextMenu:stopEditRow,pagination:true,pageSize:25,pageList:[20,25,30,40,60]">
     <thead>
     <tr>
         <th data-options="checkbox:true"></th>
-        <th data-options="field:'icon',width:30,align:'center',formatter:function(v,r){return '&lt;img src=../../images/icons/event.gif &gt;';}"></th>
-        <th id="abc" data-options="field:'Eventid',width:160,sortable:true,editor:{type:'combobox',options:{
-  valueField:'Eventid',
-  textField:'EventName',
-  method:'GET',
-  url:'../json/sequenceFlowEvent.json',
-  formatter:function(row){ var s = row.EventName + '('+row.Eventid+')';return s;}
-}}">对应事件id
+        <th data-options="field:'RuleNum',width:100,sortable:true,align:'center'">规则ID</th>
+        <th data-options="field:'RuleName',width:120,sortable:true,editor:'text',align:'center'">规则名</th>
+        <th data-options="field:'Folderid',width:150,sortable:true,align:'center',editor:{type:'combotree',options:{
+              method:'GET',
+              url:'../json/RuleSort.json'
+            }}">所属分类
         </th>
-        <th data-options="field:'RuleNum',width:200,sortable:true,editor:{type:'combotree',options:{
-  method:'GET',
-  url:'../json/rulenum.json'
-}}">触发规则
-        </th>
-        <th data-options="field:'Params',width:130,sortable:true,editor:'text'">规则参数</th>
-        <th data-options="field:'SortNum',width:60,sortable:true,editor:'text'">排序号</th>
-    </tr>
+        <th data-options="field:'ClassPath',width:120,sortable:true,align:'center'">类路径</th>
+        <th data-options="field:'WF_DocCreated',width:85,sortable:true,align:'center'">创建时间</th>
     </thead>
 </table>
 <div id="win"></div>
 </body>
-</html>
 </html>

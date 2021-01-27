@@ -234,4 +234,45 @@ public interface FlowChart {
     public JSONObject getUnid();
 
 
+
+    /**
+     * 更新事件规则配置到数据库中[用于对class初始化]
+     * @return {"status","0/1","msg":"提示信息"}
+     */
+    public JSONObject updateEventRuleConfig();
+
+
+    /**
+     * 通用更新表格数据
+     * @param tableName  表名
+     * @return {"status","0/1","msg":"提示信息"}
+     */
+    public JSONObject saveEventRuleConfig(JSONArray eventRows, String tableName);
+
+
+    /**
+     * 通用删除表格数据
+     * @param docUnidList  删除的记录id，多个以逗号隔开
+     * @param tableName  表名
+     * @return  {"status","0/1","msg":"提示信息"}
+     */
+    public JSONObject deleteEventRuleConfig(String docUnidList, String tableName);
+
+
+    /**
+     * 通用获取表格数据
+     * @param page       分页
+     * @param rows       记录数
+     * @param tableName  表名
+     * @param searchStr  搜索字段
+     * @param DefaultSearchField  查询字段名称，如：ruleName,classpath
+     * @return  {"status","0/1","msg":"提示信息"}
+     */
+    public JSONObject getCommonJson(int page, int rows, String tableName, String searchStr, String DefaultSearchField);
+
+    /**
+     * 返回规则分类，带有具体规则
+     * @return 返回规则 json tree
+     */
+    public JSONArray getRuleTree();
 }

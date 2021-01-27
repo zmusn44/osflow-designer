@@ -2,15 +2,28 @@ package cn.linkey.flowdesign.api;
 
 import cn.linkey.orm.dao.Rdb;
 import cn.linkey.orm.doc.Document;
+import cn.linkey.orm.doc.impl.DocumentsUtil;
 import cn.linkey.orm.factory.BeanCtx;
 import cn.linkey.flowdesign.utils.Tools;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.util.ClassUtils;
 
+import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.sql.Connection;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 
 public class FlowchartImp implements FlowChart {
@@ -750,5 +763,292 @@ public class FlowchartImp implements FlowChart {
         result.put("ok", "ok");
         return result;
     }
+
+
+
+	/**
+	 * 更新事件规则配置到数据库中
+	 *
+	 * @return {"status","0/1","msg":"提示信息"}
+	 */
+	@Override
+	public JSONObject updateEventRuleConfig() {
+
+		// 流程引擎 即osflow-engine.jar 内部类更新
+		// 包名  事件地址：cn.linkey.rulelib.Event;
+		String packageName = "cn.linkey.rulelib.Event";
+		updateEventConfg(packageName);
+
+		// 外部类更新
+		String extpackageName = "cn.linkey.rulelib.extevent";
+		updateEventConfg(extpackageName);
+
+
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put("status", "1");
+		jsonObj.put("msg", "更新成功！");
+
+		return jsonObj;
+	}
+
+
+	/**
+	 * 更新事件规则配置到数据库中
+	 *
+	 * @return {"status","0/1","msg":"提示信息"}
+	 */
+	public Boolean updateEventConfg(String packageName){
+
+		Rdb rdb = BeanCtx.getRdb();
+		SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
+		List<String> classNames = null;
+		try {
+			classNames = getClasspath(packageName);
+			if (classNames != null) {
+				for (String className : classNames) {
+
+					String sql = "select * from bpm_rulelist where ClassPath='" + className + "'";
+					Document doc = rdb.getDocumentBySql(sql);
+
+					if (doc.isNewDoc()) {
+						doc.s("WF_OrUnid", rdb.getNewUnid());
+						doc.s("WF_DocCreated", ft.format(new Date()));
+						doc.s("RuleName", className.substring(className.lastIndexOf(".") + 1));
+					}
+
+					doc.s("RuleNum", className.substring(className.lastIndexOf(".") + 1));
+					doc.s("RuleType", "8");
+					doc.s("ClassPath", className);
+					doc.s("Singleton", "1");
+					doc.s("WF_CacheFlag", "0");
+					doc.s("WF_AddName", BeanCtx.getUserid());
+					doc.s("WF_AddName_CN", BeanCtx.getUserid());
+					doc.save();
+
+					System.out.println("className: " + className);
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
+
+	/**
+	 * 遍历某个包下面的类路径
+	 * @param packagePath 包路径
+	 * @return 包下面所有类名
+	 * @throws Exception 获取类名出错则抛出异常
+	 */
+	public List<String> getClasspath(String packagePath) throws Exception {
+		ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+		MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resourcePatternResolver);
+		// 加载系统所有类资源
+		Resource[] resources = resourcePatternResolver.getResources("classpath*:" + packagePath.replaceAll("[.]", "/") + "/**/*.class");
+		List<String> list = new ArrayList<>();
+		// 把每一个class文件找出来
+		for (Resource r : resources) {
+			MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(r);
+			Class<?> clazz = ClassUtils.forName(metadataReader.getClassMetadata().getClassName(), null);
+			list.add(clazz.getName());
+
+		}
+		return list;
+	}
+
+
+	/**
+	 * 通用更新表格数据
+	 *
+	 * @param tableName 表名
+	 * @return {"status","0/1","msg":"提示信息"}
+	 */
+	public JSONObject saveEventRuleConfig(JSONArray eventRows, String tableName) {
+
+		LinkedHashSet<Document> docs = DocumentsUtil.jsonStr2dc(eventRows.toJSONString(), tableName);
+		DocumentsUtil.saveAll(docs);
+
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put("status","1");
+		jsonObj.put("msg","更新成功！");
+
+		return jsonObj;
+	}
+
+
+	/**
+	 * 通用删除表格数据
+	 *
+	 * @param docUnidList 删除的记录id，多个以逗号隔开
+	 * @param tableName   表名
+	 * @return "ok", "成功删除"+i+"条记录！"
+	 */
+	public JSONObject deleteEventRuleConfig(String docUnidList, String tableName) {
+
+		String[] unids = docUnidList.split(",");
+		Rdb rdb = BeanCtx.getRdb();
+		int i = 0;
+		for (String unid : unids) {
+			String sql = "delete from " + tableName + " where WF_OrUnid = '" + unid + "'";
+			if (rdb.execSql(sql) > 0) {
+				i++;
+			}
+		}
+		JSONObject json = new JSONObject();
+		json.put("ok", "成功删除" + i + "条记录！");
+
+		return json;
+	}
+
+
+	/**
+	 * 通用获取表格数据
+	 * @param page       分页
+	 * @param rows       记录数
+	 * @param tableName  表名
+	 * @param searchStr  搜索字段
+	 * @param DefaultSearchField  查询字段名称，如：ruleName,classpath
+	 * @return  {"status","0/1","msg":"提示信息"}
+	 */
+	public JSONObject getCommonJson(int page, int rows, String tableName, String searchStr, String DefaultSearchField) {
+
+		Rdb rdb = BeanCtx.getRdb();
+		Connection conn = null;
+		Document[] docs = null;
+
+		try {
+			conn = rdb.getConnection();
+
+			String sqlWhere = "select * from " + tableName;
+
+			// 组合搜索字符串
+			if (Tools.isNotBlank(searchStr) && Tools.isNotBlank(DefaultSearchField)) {
+				searchStr = "%" + searchStr + "%";
+				String defaultSearchField = "";
+				if (rdb.getDbType(conn).equals("MSSQL")) {
+					defaultSearchField = DefaultSearchField.replace(",", "+"); // sql server把,号换成+号
+				} else if (rdb.getDbType().equals("MYSQL")) {
+					defaultSearchField = "concat(" + DefaultSearchField + ")"; // mysql需要使用concat方法
+				} else {
+					defaultSearchField = DefaultSearchField.replace(",", "||"); // oracle把,号换成||号
+				}
+				searchStr = " where " + defaultSearchField + " like '" + searchStr + "'";
+				sqlWhere = sqlWhere + searchStr;
+			}
+
+			sqlWhere = sqlWhere + " order by WF_DocCreated DESC ";
+
+			docs = rdb.getAllDocumentsBySql(tableName, sqlWhere, page, rows);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		String jsonStr = DocumentsUtil.dc2json(docs, "");
+
+		JSONObject json = new JSONObject();
+		json.put("total", docs.length);
+		json.put("rows", JSONArray.parseArray(jsonStr));
+
+		return json;
+	}
+
+
+
+
+	/**
+	 * 返回规则分类，带有具体规则
+	 *
+	 * @return 返回规则 json tree
+	 */
+	@Override
+	public JSONArray getRuleTree() {
+
+		// 这里规则分类树与 /design/linkey/bpm/newFlow/json/RuleSort.json 对应
+		String treeJsonStr = "[{\"id\":\"001\",\"text\":\"规则分类树\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"view?wf_num=V_S010_G001\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"4316D1E504ECC04E8F087B5084D1A56C8F8E\",\"spread\":\"\",\"state\":\"closed\",\"children\":[{\"id\":\"001007\",\"text\":\"流程规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"78c98edb06873045700af5d00df8e46a76a6\",\"spread\":\"\",\"state\":\"closed\",\"children\":[{\"id\":\"001007002\",\"text\":\"超时规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"2D56E8310AEB904D0B08EB804D9E197DC5B7\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001007004\",\"text\":\"参与者规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"95be8a390224504d0b0b7c30d80c1b6088b4\",\"spread\":\"\",\"state\":\"closed\",\"children\":[{\"id\":\"001007004001\",\"text\":\"参与者规则配置\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"editorgrid?wf_num=V_S001_E012\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"9a8e3d370be2c0435d09e6d024dbf07df9e5\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001007004002\",\"text\":\"参与者规则管理\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"ee592ee800e0904c280ae180f2651edda691\",\"spread\":\"\",\"state\":\"open\"}]},{\"id\":\"001007001\",\"text\":\"路由规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"b1f8d9c00e14b048a809dd502aca332ce404\",\"spread\":\"1\",\"state\":\"open\"},{\"id\":\"001007006\",\"text\":\"节点规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"954e86fd0173904e65093d00a07dad7c8cbe\",\"spread\":\"1\",\"state\":\"open\",\"children\":[{\"id\":\"001007006001\",\"text\":\"开始节点\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"445c3df80147804590098c805ec8124204ef\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001007006002\",\"text\":\"结束节点\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"4f7dc1cf0cf1f04b170ade105f64528ec8d5\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001007006003\",\"text\":\"人工节点\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"7410d2db0ef9204b290a74700e9c028615fd\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001007006004\",\"text\":\"自动节点\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"49030ed409229041dc0b8e90335167d78a3a\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001007006005\",\"text\":\"前置事件节点\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"eff773e8072360432808193071f39fbd43f1\",\"spread\":\"1\",\"state\":\"open\"},{\"id\":\"001007006006\",\"text\":\"网关节点\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"3bab86f806e3504f910b6c70e54b74766d7e\",\"spread\":\"1\",\"state\":\"open\"},{\"id\":\"001007006007\",\"text\":\"子流程节点\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"7ebfbc550d66f04a490981108061e3520003\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001007006008\",\"text\":\"后置事件节点\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"1df23e740003e041230815f05aee330d1ab0\",\"spread\":\"\",\"state\":\"open\"}]},{\"id\":\"001007005\",\"text\":\"补偿规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"bae3c11d09b1904c8e09a250075c6a65bd5b\",\"spread\":\"1\",\"state\":\"open\"},{\"id\":\"001007003\",\"text\":\"过程规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"123e914d0109f041330b7f80ec961cc1a5cf\",\"spread\":\"\",\"state\":\"open\"}]},{\"id\":\"001002\",\"text\":\"管控规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"1b94b9640bd060432b095290a563505593c4\",\"spread\":\"\",\"state\":\"closed\",\"children\":[{\"id\":\"001002004\",\"text\":\"质量管控\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"faaae7c901cad046730bd190500833d1fb44\",\"spread\":\"\",\"state\":\"closed\",\"children\":[{\"id\":\"001002004001\",\"text\":\"质量计算规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"be234afe0aec004449097c40b2c8d6f9726c\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001002004002\",\"text\":\"质量应对规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"854cb4110778904adb0bef60a1162c1e7cb7\",\"spread\":\"\",\"state\":\"open\"}]},{\"id\":\"001002002\",\"text\":\"成本管控\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"e9a78353060ec046c80b82f0f36aa9f47af9\",\"spread\":\"\",\"state\":\"closed\",\"children\":[{\"id\":\"001002002001\",\"text\":\"成本计算规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"bf7ed7010ef01045bd0bdd70db5fd78be82e\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001002002002\",\"text\":\"成本应对规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"a61190a20bacf04e140a2040db05613521d0\",\"spread\":\"\",\"state\":\"open\"}]},{\"id\":\"001002001\",\"text\":\"风险管控\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"a07e6dcc023ae043920a0890d27c2d0b115f\",\"spread\":\"\",\"state\":\"closed\",\"children\":[{\"id\":\"001002001001\",\"text\":\"风险等级规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"ccc59678093d504e090a33a02a6163ce2611\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001002001002\",\"text\":\"风险应对规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"b146eff802c100448008c660b18421a3cbbe\",\"spread\":\"\",\"state\":\"open\"}]},{\"id\":\"001002003\",\"text\":\"绩效管控\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"dafddc8c09cf604d8209c600fc8e6e9b1828\",\"spread\":\"\",\"state\":\"closed\",\"children\":[{\"id\":\"001002003001\",\"text\":\"绩效计算规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"bd79f58e038f004a47082df025016a9ac45e\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001002003002\",\"text\":\"绩效应对规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"110a92b70fb4004cb80989008117d35d4a6f\",\"spread\":\"\",\"state\":\"open\"}]}]},{\"id\":\"001006\",\"text\":\"表单规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"cead6cdb08795047a00a2730a1f5b82486ce\",\"spread\":\"\",\"state\":\"closed\",\"children\":[{\"id\":\"001006001\",\"text\":\"表单事件\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"view?wf_num=V_S001_G034&WF_Appid=S009&EventType=1\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"b951e0f60284404d6c0978e0326021febb3d\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001006002\",\"text\":\"后端字段规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"view?wf_num=V_S001_G033\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"eebfc75209ac70425909170007a0e04b1958\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001006003\",\"text\":\"前端验证规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"editorgrid?wf_num=V_S001_E009\",\"Itemid\":\"\",\"OpenType\":\"center\",\"WF_OrUnid\":\"af96118e0ef000494a0b88e0d9e17bd8d80c\",\"spread\":\"1\",\"state\":\"open\"}]},{\"id\":\"001001\",\"text\":\"业务规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"1545bef7064160428309bf90e4e4294f45c5\",\"spread\":\"\",\"state\":\"closed\",\"children\":[{\"id\":\"001001001\",\"text\":\"集成规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"D094FD090FEC104EA80823E0709A70A132C0\",\"spread\":\"\",\"state\":\"closed\",\"children\":[{\"id\":\"001001001001\",\"text\":\"SAP\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"f333316d01b44046be0a04706d94fe9bc1f1\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001001001002\",\"text\":\"HR\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"5c0e817f05b6a04bcb0a0ea0fc036aa2d484\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001001001003\",\"text\":\"数据库\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"b39ae46d0a09804dfd0ae910d14be1348190\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001001001004\",\"text\":\"CRM\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"e7e71e6501afd045d409c550fa8e8e92705c\",\"spread\":\"\",\"state\":\"open\"}]},{\"id\":\"001001002\",\"text\":\"公共规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"51583e7e052a6043060b7c40568ce1de160a\",\"spread\":\"1\",\"state\":\"open\"}]},{\"id\":\"001003\",\"text\":\"示例规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"d9fee5b40410b04c81086f10db28b241aec0\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001004\",\"text\":\"项目规则\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"a025354c072f60495e0bc010e6a5694d4799\",\"spread\":\"\",\"state\":\"closed\",\"children\":[{\"id\":\"001004001\",\"text\":\"转正申请\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"7dd8a23e05b74046080a2a80bd3ee16d4cfe\",\"spread\":\"\",\"state\":\"open\"},{\"id\":\"001004002\",\"text\":\"请假申请\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"b6ff200d0fc3004d8a091ff0ef6ceb2398df\",\"spread\":\"\",\"state\":\"open\"}]},{\"id\":\"001005\",\"text\":\"Alibao测试\",\"iconCls\":\"\",\"Treeid\":\"T_S010_001\",\"ItemUrl\":\"\",\"Itemid\":\"\",\"OpenType\":\"\",\"WF_OrUnid\":\"7cafda460c0990458809521085a6cb0a5659\",\"spread\":\"\",\"state\":\"open\"}]}]\n";
+
+		JSONArray jsonArray = JSONArray.parseArray(treeJsonStr);
+
+		getRuleTreeChildren(jsonArray);
+
+
+		return jsonArray;
+	}
+
+	/**
+	 * 对规则树循环遍历，添加规则
+	 *
+	 * @param jsonArray 规则分类树
+	 * @return 含有分类的规则分类树
+	 */
+	public JSONArray getRuleTreeChildren(JSONArray jsonArray) {
+
+		for (int i = 0; i < jsonArray.size(); i++) {
+
+			JSONObject chaildJSON = jsonArray.getJSONObject(i);
+			String folderName = chaildJSON.getString("text");
+			String folderid = chaildJSON.getString("id");
+			chaildJSON.put("text", folderName += "(" + getRuleNum(folderid) + ")");
+
+			JSONArray childrenArr = (JSONArray) chaildJSON.get("children");
+
+			if (childrenArr == null) {
+				chaildJSON.put("children", getAllDocList(folderid));
+			} else {
+				getRuleTreeChildren(childrenArr);
+			}
+		}
+
+		return jsonArray;
+	}
+
+
+	/**
+	 * 获得分类下的所有流程规则
+	 *
+	 * @param folderid 角色编号
+	 * @return
+	 */
+	public JSONArray getAllDocList(String folderid) {
+
+		Rdb rdb = BeanCtx.getRdb();
+
+		StringBuilder jsonStr = new StringBuilder();
+		String sql = "select * from BPM_RuleList where Folderid='" + folderid + "' and RuleType='8'";
+		Document[] dc = rdb.getAllDocumentsBySql(sql);
+
+		JSONArray ruleArr = new JSONArray();
+
+		int i = 0;
+		for (Document doc : dc) {
+
+			JSONObject ruleConfig = new JSONObject();
+			ruleConfig.put("text", doc.g("RuleName") + "(" + doc.g("RuleNum") + ")");
+			ruleConfig.put("id",doc.g("RuleNum"));
+			ruleConfig.put("iconCls","icon-method");
+			ruleConfig.put("state","open");
+
+			ruleArr.add(ruleConfig);
+
+		}
+		return ruleArr;
+	}
+
+
+	/**
+	 * 获得分类下有几个流程数
+	 *
+	 * @param folderid 规则分类id
+	 * @return 规则具体分类下的规则个数
+	 */
+	public String getRuleNum(String folderid) {
+		Rdb rdb = BeanCtx.getRdb();
+		String sql = "select Count(*) as TotalNum from BPM_RuleList where Folderid like '" + folderid + "%'";
+		return rdb.getValueBySql(sql);
+	}
     
 }

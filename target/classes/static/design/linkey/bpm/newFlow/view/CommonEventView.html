@@ -50,12 +50,64 @@
             processAttrUrl = processAttrUrl.replace("{processid}", GetUrlArg("Processid")).replace("{nodeid}", GetUrlArg("Nodeid"));
 
             $('#dg').datagrid({
-                method: "GET",
+                method: 'GET',
                 url: processAttrUrl,
             });
-            // $('#dg').datagrid('load');
+            // $.getJSON(processAttrUrl,
+            //     function(data){
+            //         $('#dg').datagrid('loadData', data);
+            //     });
+
         })
 
+        /**
+         * 获取规则分类树
+         **/
+        function getTreeData(){
+            var treeData = null;
+
+            $.ajax({
+                type : 'GET',
+                url : CONFIG.url.getRuleTree, // 得到数据的URL地址
+                cache : false,
+                async : false,
+                dataType : 'json',
+                data : {}, // 请求参数
+                success : function(result) {
+                    treeData = result;
+                }
+            });
+            return treeData;
+
+        }
+
+        /**
+         * 获取事件类型
+         *  url:'../json/ProcessEvent.json',
+         **/
+        function getEventData(){
+            var treeData = null;
+
+            var eventType = GetUrlArg("eventType");
+            $.ajax({
+                type : 'GET',
+                url : '../json/' + eventType + '.json', // 得到数据的URL地址
+                cache : false,
+                async : false,
+                dataType : 'json',
+                data : {}, // 请求参数
+                success : function(result) {
+                    treeData = result;
+                }
+            });
+            return treeData;
+
+        }
+
+
+        /**
+         * 保存提交
+         * */
         function saveEditorGrid() {
             //获得所有修改的数据
             stopEditRow();
@@ -69,14 +121,16 @@
                 rowData[i].Processid = GetUrlArg("Processid");
                 rowData[i].Nodeid = GetUrlArg("Nodeid");
             }
+            // console.dir(rowData)
             var newRow = JSON.stringify(rowData);
-
             var editRow = JSON.stringify(dg.datagrid('getChanges', 'updated'));
-            //保存修改结果
+
 
             var saveFlowAttrUrl = CONFIG.url.saveFlowChartEventByNodeType;
             saveFlowAttrUrl = saveFlowAttrUrl.replace("{processid}", GetUrlArg("Processid")).replace("{nodeid}", GetUrlArg("Nodeid"));
 
+
+            //保存修改结果
             mask();
             $.post(saveFlowAttrUrl, {
                 WF_Action: 'saveEditor',
@@ -140,6 +194,14 @@
             lastIndex = undefined;
         }
 
+        /**
+         * 跳转配置事件规则
+         */
+        function gotoConfigRule() {
+            var url = "./RuleSetting.html?Processid=" + GetUrlArg("Processid") + "&Nodeid=" + GetUrlArg("Nodeid");
+            location.href = url;
+        }
+
 
     </script>
 </head>
@@ -149,13 +211,15 @@
 <div class="toptoolbar" id="toptoolbar">
     |
     <a href="#" id="btnSave" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-save'"
-       onclick="saveEditorGrid();return false;">保存事件</a>|
+       onclick="saveEditorGrid();return false;">保存事件</a> -
     <a href="#" id="btnNew" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-add'"
-       onclick="insertRow();return false;">新增事件</a>|
+       onclick="insertRow();return false;">新增事件</a> -
     <a href="#" id="btnDel" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-remove'"
-       onclick="removeSelectedRow();return false;">删除</a>|
+       onclick="removeSelectedRow();return false;">删除</a> -
     <a href="#" id="btn01" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-ok'"
-       onclick="stopEditRow();return false;">停止编辑</a>
+       onclick="stopEditRow();return false;">停止编辑</a> -
+    <a href="#" id="btnRuleConfig" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-add'"
+       onclick="gotoConfigRule();return false;">配置规则</a>
 </div>
 <table id="dg" class="easyui-datagrid"
        data-options="toolbar:toptoolbar,fit:true,autoRowHeight:false,remoteSort:true,border:false,rownumbers: true,fitColumns:true,singleSelect:false,multiSort:true,onDblClickRow:stopEditRow,onClickRow:RowClick,onRowContextMenu:stopEditRow,pageSize:25,pageList:[20,25,30,40,60]">
@@ -164,17 +228,15 @@
         <th data-options="checkbox:true"></th>
         <th data-options="field:'icon',width:30,align:'center',formatter:function(v,r){return '&lt;img src=../../images/icons/event.gif &gt;';}"></th>
         <th id="abc" data-options="field:'Eventid',width:160,sortable:true,editor:{type:'combobox',options:{
-  valueField:'Eventid',
-  textField:'EventName',
-  method:'GET',
-  url:'../json/Event.json',
-  formatter:function(row){ var s = row.EventName + '('+row.Eventid+')';return s;}
-}}">对应事件id
+                valueField:'Eventid',
+                textField:'EventName',
+                data: getEventData(),
+                formatter:function(row){ var s = row.EventName + '('+row.Eventid+')';return s;}
+            }}">对应事件id
         </th>
         <th data-options="field:'RuleNum',width:200,sortable:true,editor:{type:'combotree',options:{
-  method:'GET',
-  url:'../json/rulenum.json'
-}}">触发规则
+                data: getTreeData()
+            }}">触发规则
         </th>
         <th data-options="field:'Params',width:130,sortable:true,editor:'text'">规则参数</th>
         <th data-options="field:'SortNum',width:60,sortable:true,editor:'text'">排序号</th>
