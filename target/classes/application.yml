@@ -14,7 +14,7 @@ spring:
     # 初始化大小，最小，最大
     druid:
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://127.0.0.1:3306/osflow-server-demo?characterEncoding=utf8
+      url: jdbc:mysql://127.0.0.1:3306/flowchart?characterEncoding=utf8
       username: root
       password: 1234
       initial-size: 5

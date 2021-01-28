@@ -1,24 +1,26 @@
-[{
-		"Eventid":"NodeBeforeStarted",
-		"EventName":"节点偿试启动前"
-	},
-	{
-		"Eventid":"NodeAfterStarted",
-		"EventName":"节点偿试启动后"
-	},
-	{
-		"Eventid":"NodeBeforeEnd",
-		"EventName":"节点偿试结束前"
-	},
-	{
-		"Eventid":"NodeAfterEnd",
-		"EventName":"节点偿试结束后"
-	},
-	{
-		"Eventid":"InsNodeDocBeforeStart",
-		"EventName":"节点实际启动前"
-	},
-	{
-		"Eventid":"InsNodeDocBeforeEnd",
-		"EventName":"节点实际结束后"
-}]
+[
+  {
+    "Eventid": "NodeBeforeStarted",
+    "EventName": "节点尝试启动前(运行节点启动规则前)"
+  },
+  {
+    "Eventid": "NodeAfterStarted",
+    "EventName": "节点尝试启动后(运行节点启动规则后)"
+  },
+  {
+    "Eventid": "NodeBeforeEnd",
+    "EventName": "节点尝试结束前(运行节点结束规则前)"
+  },
+  {
+    "Eventid": "NodeAfterEnd",
+    "EventName": "节点尝试结束后(运行节点结束规则后)"
+  },
+  {
+    "Eventid": "InsNodeDocBeforeStart",
+    "EventName": "节点实际启动前(节点实例启动前-存数据库前)"
+  },
+  {
+    "Eventid": "InsNodeDocBeforeEnd",
+    "EventName": "节点实际结束前(节点实例结束前-存数据库前)"
+  }
+]
